@@ -644,8 +644,13 @@ restoreOverwrittenFilesWithOriginals().then(() => {
 
   /* Routes for promotion video page */
   app.get('/promotion', promotionVideo())
-  app.get('/video', getVideo())
-
+  const videoLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 20, // limit each IP to 20 requests per windowMs
+    standardHeaders: true, // return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // disable the `X-RateLimit-*` headers
+  });
+  app.get('/video', videoLimiter, getVideo())
   /* Routes for profile page */
   app.get('/profile', security.updateAuthenticatedUsers(), getUserProfile())
   app.post('/profile', updateUserProfile())
